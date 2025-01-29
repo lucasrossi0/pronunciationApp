@@ -2,6 +2,7 @@ package dev.pronunciationAppBack.controller;
 
 import dev.pronunciationAppBack.model.Word;
 import dev.pronunciationAppBack.repository.WordRepository;
+import dev.pronunciationAppBack.service.WordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,10 +20,19 @@ public class WordController {
     @Autowired
     private WordRepository wordRepository;
 
+    @Autowired
+    private WordService wordService;
+
     @GetMapping("/hello")
     public ResponseEntity<String> hello() {
         HttpHeaders headers = getCommonHeaders("Hello endpoint");
         return new ResponseEntity<>("hello Emiliano, are you sleeping?", headers, HttpStatus.OK);
+    }
+
+    // Endpoint to return the state of the Word being passed to the body of the request
+    @GetMapping("/isActive")
+    public String isWordActive(@RequestBody Word word){
+        return wordService.isWordActive(word) ? "Active" : "Not active";
     }
 
     @GetMapping
