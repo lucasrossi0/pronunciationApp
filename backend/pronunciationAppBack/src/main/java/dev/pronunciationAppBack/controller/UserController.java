@@ -16,29 +16,22 @@ import java.util.List;
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers(){
-        return userRepository.findAll();
-    }
-
-    @GetMapping("/hello")
-    public ResponseEntity<String> hello(){
-        return new ResponseEntity<>("Hello guys", HttpStatus.OK);
+    public ResponseEntity<List<User>> getAllUsers(){
+        return userService.getAllUsers();
     }
 
     @PostMapping("/isActive")
-    public String isUserActive(@RequestBody User user){
-        return userService.isUserActive(user) ? "Active" : "Not active";
+    public ResponseEntity<String> isUserActive(@RequestBody User user){
+        return userService.isUserActive(user);
     }
 
     @PostMapping("/createUser")
-    public ResponseEntity<String> createUser(@RequestBody User user){
-        userRepository.save(user);
-        return new ResponseEntity<>("Created", HttpStatus.CREATED);
+    public ResponseEntity<?> createUser(@RequestBody User user){
+        return userService.createUser(user);
     }
+
+
 }
