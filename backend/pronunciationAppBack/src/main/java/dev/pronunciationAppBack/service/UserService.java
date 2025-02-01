@@ -85,6 +85,11 @@ public class UserService {
         return userRepository.findById(id).isEmpty() ? ResponseEntity.status(HttpStatus.OK).build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    public ResponseEntity<HttpStatus> deleteUser(User user){
+        userRepository.delete(user);
+        return userRepository.findById(user.getId()).isEmpty() ? ResponseEntity.status(HttpStatus.OK).build() : ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
     public ResponseEntity<Integer> getUserLevel(User user){
         if (userRepository.findById(user.getId()).isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

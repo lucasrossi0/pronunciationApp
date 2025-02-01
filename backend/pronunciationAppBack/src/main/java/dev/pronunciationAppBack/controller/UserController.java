@@ -33,5 +33,20 @@ public class UserController {
         return userService.createUser(user);
     }
 
+    @DeleteMapping()
+    public void deleteAllWords(){
+        userService.deleteAllWords();
+    }
+
+/*    @DeleteMapping()
+    public void deleteUser(@RequestBody User user){
+        userService.deleteUser(user);
+    }*/
+
+    @DeleteMapping("/{id}")
+    public void deleteUserById(@RequestParam String id){
+        userService.getUserById(id);
+    }
+
 
 }
