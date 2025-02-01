@@ -59,8 +59,6 @@ app.listen(port, () => {
 4. Run the server: `node server.js`
 5. Use `http://localhost:3000` as your base URL in React Axios requests
 
-
-
 ## JSON Server
 
 > JSON Serverr: A full fake REST API with zero coding, it is a powerful tool for creating mock REST APIs quickly and easily. Here are the key points about JSON Server:
