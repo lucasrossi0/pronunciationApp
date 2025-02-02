@@ -1,7 +1,6 @@
 package dev.pronunciationAppBack.controller;
 
 import dev.pronunciationAppBack.model.Word;
-import dev.pronunciationAppBack.repository.WordRepository;
 import dev.pronunciationAppBack.service.WordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -11,14 +10,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/words")
 public class WordController {
-
-    @Autowired
-    private WordRepository wordRepository;
 
     @Autowired
     private WordService wordService;
@@ -29,15 +24,16 @@ public class WordController {
         return new ResponseEntity<>("hello Emiliano, are you sleeping?", headers, HttpStatus.OK);
     }
 
-    // Endpoint to return the state of the Word being passed to the body of the request
     @GetMapping("/isActive")
-    public String isWordActive(@RequestBody Word word){
-        return wordService.isWordActive(word) ? "Active" : "Not active";
+    public ResponseEntity<String> isWordActive(@RequestBody Word word) {
+        boolean isActive = wordService.isWordActive(word);
+        HttpHeaders headers = getCommonHeaders("Check if word is active");
+        return new ResponseEntity<>(isActive ? "Active" : "Not active", headers, HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<List<Word>> getAllWords() {
-        List<Word> words = wordRepository.findAll();
+        List<Word> words = wordService.getAllWords();
         HttpHeaders headers = getCommonHeaders("Get all words");
 
         return !words.isEmpty()
@@ -47,35 +43,33 @@ public class WordController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Word> getWordById(@PathVariable String id) {
-        Optional<Word> word = Optional.ofNullable(wordRepository.getWordById(id));
-        HttpHeaders headers = getCommonHeaders("Get word by ID");
-
-        return word.map(value -> new ResponseEntity<>(value, headers, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(headers, HttpStatus.NOT_FOUND));
+        return wordService.getWordById(id)
+                .map(word -> new ResponseEntity<>(word, getCommonHeaders("Get word by ID"), HttpStatus.OK))
+                .orElse(new ResponseEntity<>(getCommonHeaders("Get word by ID"), HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/createWord")
     public ResponseEntity<Word> createWord(@RequestBody Word word) {
-        Word createdWord = wordRepository.save(word);
+        Word createdWord = wordService.createWord(word);
         HttpHeaders headers = getCommonHeaders("Create a new word");
-
         return new ResponseEntity<>(createdWord, headers, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Word> updateWord(@PathVariable String id, @RequestBody Word word) {
-        Word updatedWord = wordRepository.save(word);
+        if (!id.equals(word.getId())) {
+            return new ResponseEntity<>(getCommonHeaders("Update a word"), HttpStatus.BAD_REQUEST);
+        }
+        Word updatedWord = wordService.updateWord(word);
         HttpHeaders headers = getCommonHeaders("Update a word");
-
         return new ResponseEntity<>(updatedWord, headers, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteWord(@PathVariable("id") String idToDelete) {
         HttpHeaders headers = getCommonHeaders("Delete a word");
-
-        if (wordRepository.existsById(idToDelete)) {
-            wordRepository.deleteById(idToDelete);
+        boolean deleted = wordService.deleteWord(idToDelete);
+        if (deleted) {
             return new ResponseEntity<>("Word deleted", headers, HttpStatus.OK);
         } else {
             return new ResponseEntity<>("Word not found", headers, HttpStatus.NOT_FOUND);
@@ -84,7 +78,7 @@ public class WordController {
 
     @DeleteMapping
     public ResponseEntity<String> deleteAllWords() {
-        wordRepository.deleteAll();
+        wordService.deleteAllWords();
         HttpHeaders headers = getCommonHeaders("Delete all words");
         return new ResponseEntity<>("All words deleted", headers, HttpStatus.OK);
     }
@@ -96,7 +90,7 @@ public class WordController {
         headers.add("date", new Date().toString());
         headers.add("server", "Spring Boot");
         headers.add("version", "1.0.0");
-        headers.add("word-count", String.valueOf(wordRepository.count()));
+        headers.add("word-count", String.valueOf(wordService.getWordCount()));
         headers.add("object", "words");
         return headers;
     }
